@@ -42,7 +42,7 @@
         function addMessage(message) {
             var text = convert(message);
 
-            if (lines.length > 10) {
+            if (lines.length > 30) {
                 lines.shift();
             }
 
@@ -72,7 +72,7 @@
         }
 
         function addPositionLine(line) {
-            if (positionLines.length > 10) {
+            if (positionLines.length > 50) {
                 positionLines.shift();
             }
             positionLines.push(line);
@@ -215,7 +215,7 @@
             } else {
                 if (dist < range2) {
                     if (pier.name == position.latestPierName) {
-                        positionStr = "Departing from " + pier.name;
+                        positionStr = "Departing " + pier.name;
                     }  else {
                         positionStr = "Approaching " + pier.name;
                     }
@@ -228,7 +228,7 @@
                 var mmsi = feature.mmsi;
                 var name = vessels[mmsi].name;
                 var time = new Date().toLocaleTimeString("fi");
-                if (positionStr == 'On the move' && position.latestPierName) positionStr += " from " + position.latestPierName;
+                if (positionStr == 'On the move' && position.latestPierName) positionStr += ". Left " + position.latestPierName + " at " + new Date(position.latestPierTimestamp).toLocaleTimeString("fi");
                 addPositionLine(time + " " + name + ": " + positionStr);
                 updatePositionsList();
             }
@@ -480,7 +480,7 @@
 </head>
 <body>
     <h2>Raw Messages</h2>
-    <div class="messages" onmouseenter="suspendUpdate()" onmouseleave="resumeUpdate()" style="border: 1px solid; max-height: 300px; overflow-y: scroll; "></div>
+    <div class="messages" onmouseenter="suspendUpdate()" onmouseleave="resumeUpdate()" style="border: 1px solid; max-height: 300px; overflow-y: scroll; font-size: 0.7rem; "></div>
     <h2>Position Updates</h2>
     <div class="positions" style="border: 1px solid; max-height: 300px; overflow-y: scroll; "></div>
     <h2>Locations</h2>
