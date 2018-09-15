@@ -9,6 +9,7 @@
         var baseUri = "http://meri-aws-test.digitraffic.fi/api/v1/";
 
         var lines = [];
+        var positionLines = [];
 
         function connect() {
             console.log('trying to connect...');
@@ -33,9 +34,9 @@
             console.info('Connection open');
             if (connectOk) return;
             connectOk = true;
-            client.subscribe("vessels/+/locations");
-            // client.subscribe("vessels/+/locations");
-            // client.subscribe("vessels/status");
+            Object.keys(latestLocations).forEach(function(mmsi){
+                client.subscribe("vessels/" + mmsi + "/#");
+            });
         }
 
         function addMessage(message) {
@@ -47,6 +48,7 @@
 
             lines.push(text);
         }
+
 
         function convert(message) {
             var content = message.payloadString;
@@ -67,6 +69,17 @@
         function updateList() {
             if (!updateOn) return;
             $(".messages").html(lines.join('<br/>'));
+        }
+
+        function addPositionLine(line) {
+            if (positionLines.length > 10) {
+                positionLines.shift();
+            }
+            positionLines.push(line);
+        }
+
+        function updatePositionsList() {
+            $(".positions").html(positionLines.join('<br/>'));
         }
 
         function isRecentLocation(location, now) {
@@ -210,7 +223,15 @@
                     positionStr = "On the move";
                 }
             }
-            position.latest = positionStr;
+            if (position.latest != positionStr) {
+                position.latest = positionStr;
+                var mmsi = feature.mmsi;
+                var name = vessels[mmsi].name;
+                var time = new Date().toLocaleTimeString("fi");
+                if (positionStr == 'On the move' && position.latestPierName) positionStr += " from " + position.latestPierName;
+                addPositionLine(time + " " + name + ": " + positionStr);
+                updatePositionsList();
+            }
         }
 
 
@@ -458,8 +479,10 @@
     </style>
 </head>
 <body>
-    <h2>Messages</h2>
+    <h2>Raw Messages</h2>
     <div class="messages" onmouseenter="suspendUpdate()" onmouseleave="resumeUpdate()" style="border: 1px solid; max-height: 300px; overflow-y: scroll; "></div>
+    <h2>Position Updates</h2>
+    <div class="positions" style="border: 1px solid; max-height: 300px; overflow-y: scroll; "></div>
     <h2>Locations</h2>
     <div class="locations"><table class="locationstable"></table></div>
 </body>
