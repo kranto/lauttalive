@@ -155,7 +155,7 @@
 
         function handleLocation(feature) {
             delete latestLocations[feature.mmsi];
-            if (isInArea(feature) && vessels[feature.mmsi]) {
+            if ((isInArea(feature) || otherVessels.indexOf(feature.mmsi) >= 0) && vessels[feature.mmsi]) {
                 storeLocation(feature);
                 return true;
             } else {
@@ -248,7 +248,8 @@
                 var mmsi = feature.mmsi;
                 var name = vessels[mmsi].name;
                 var time = new Date().toLocaleTimeString("fi");
-                if (positionStr == 'On the move' && position.latestPierName) positionStr += ". Left " + position.latestPierName + " at " + new Date(position.latestPierTimestamp).toLocaleTimeString("fi");
+                if (positionStr == 'On the move' && position.latestPierName) positionStr += ". Left " + position.latestPierName + " at " + new Date(position.latestPierTimestamp).toLocaleTimeString("fi") + ".";
+                positionStr += " " + feature.geometry.coordinates + " " + feature.properties.sog;
                 addPositionLine(time + " " + name + ": " + positionStr);
                 updatePositionsList();
             }
@@ -472,23 +473,25 @@
         ];
 
 var otherVessels = [
-'230629000', // Viking Grace
-'230172000', // Amorella
-'230361000', // Gabriella
-'230181000', // Mariella
-'230180000', // Rosella
-'266027000', // Viking Cinderella
+230629000, // Viking Grace
+230172000, // Amorella
+230361000, // Gabriella
+230181000, // Mariella
+230180000, // Rosella
+266027000, // Viking Cinderella
 
-'230639000', // Baltic Princess
-'266301000', // Galaxy
-'230184000', // Silja Serenade
-'265004000', // Silja Symphony
+230639000, // Baltic Princess
+266301000, // Galaxy
+230184000, // Silja Serenade
+265004000, // Silja Symphony
+276779000, // Baltic Queen
+276519000, // Victoria I
 
-'230671000', // Finnswan
-'230637000', // Finnfellow
-'266308000', // Eckerö
-'266314000', // Birka Stockholm
-'276817000', // Sailor
+230671000, // Finnswan
+230637000, // Finnfellow
+266308000, // Eckerö
+266314000, // Birka Stockholm
+276817000, // Sailor
 ];
 
 
