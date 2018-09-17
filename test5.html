@@ -1,6 +1,6 @@
 <html>
 <head>
-    <title>Testiclient for vessel locations</title>
+    <title>Vessels in Archipelago Sea</title>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js" ></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
     <meta charset="UTF-8">
@@ -10,6 +10,8 @@
 
         var lines = [];
         var positionLines = [];
+
+        var client;
 
         function connect() {
             console.log('trying to connect...');
@@ -34,8 +36,12 @@
             console.info('Connection open');
             if (connectOk) return;
             connectOk = true;
-            Object.keys(latestLocations).forEach(function(mmsi){
+            Object.keys(latestLocations).forEach(function(mmsi) {
                 client.subscribe("vessels/" + mmsi + "/#");
+            });
+            otherVessels.forEach(function(mmsi) {
+                if (!latestLocations[mmsi])
+                    client.subscribe("vessels/" + mmsi + "/#");
             });
         }
 
@@ -86,10 +92,11 @@
             return now - location.properties.timestampExternal < 600000;
         }
 
-        function updateLocations() {
+        function refreshLocations() {
             var headerLine = "<tr><th>#</th><th>MMSI</th><th>vessel name</th><th>age</th><th>location</th><th>speed</th><th>course</th><th>heading</th><th>destination</th><th>position</th></tr>";
             var now = Date.now();
             var i = 1;
+            var recent = false;
             var locLines = Object.keys(latestLocations)
             .sort(function(a,b) {
                 return (vessels[a].name + a).localeCompare(vessels[b].name + b);
@@ -104,10 +111,16 @@
                 var leftMessage = position.latest == "On the move" && position.latestPierTimestamp? ". Left " + position.latestPierName + " " + Math.round(leftSecondsAgo/60) + " minutes ago": "";
                 var prop = loc.properties;
                 var age = now - prop.timestampExternal;
+                if (age < 30000) recent = true;
                 var class1 = prop.sog > 0.1? "onmove": "halted";
                 return '<tr class="' + class1 + '"><td align="right">' + (i++) + '</td><td>' + mmsi + '</td><td>' + vessels[mmsi].name  + '</td><td align="right">' + Math.round(age/1000) + "</td><td>" + loc.coords + '</td><td align="right">' + prop.sog + '</td><td align="right">' + prop.cog + '</td><td align="right">' + prop.heading + '</td><td>' + vessels[mmsi].destination + "</td><td>" + position.latest + leftMessage + "</td></tr>";
             });
-            $(".locationstable").html(headerLine + locLines.join('\n'));
+            if (locLines.length > 0) {
+                $(".locationstable").html(headerLine + locLines.join('\n'));
+            } else {
+                $(".locationstable").html("<tr><th>No data</th></tr>");
+            }
+            if (!recent) init();
         }
 
         var vessels = {};
@@ -120,7 +133,7 @@
 
         function isInArea(feature) {
             var coords = feature.geometry.coordinates;
-            return (coords[0] >= 18 && coords[0] <= 23 && coords[1] >= 59 && coords[1] <= 61);
+            return (coords[0] >= 19.8 && coords[0] <= 23 && coords[1] >= 59.7 && coords[1] <= 60.7);
         }
 
         function storeMetadata(metadata) {
@@ -164,17 +177,24 @@
         }
 
 
-        $.get(baseUri + "metadata/vessels")
-        .done(function(data) {
-            data.forEach(handleMetadata);
-            $.get(baseUri + "locations/latest")
-            .done(function(data) {
-                data.features.forEach(handleLocation);
-                connect();
-            });
-        });
+        var interval;
 
-        setInterval(updateLocations, 1000);
+        function init() {
+            if (interval) clearInterval(interval);
+            interval = null;
+            $.get(baseUri + "metadata/vessels")
+            .done(function(data) {
+                data.forEach(handleMetadata);
+                $.get(baseUri + "locations/latest")
+                .done(function(data) {
+                    data.features.forEach(handleLocation);
+                    connect();
+                    interval = setInterval(refreshLocations, 1000);
+                });
+            });            
+        }
+
+        init();
 
         var updateOn = true;
         function suspendUpdate() {
@@ -210,7 +230,7 @@
                     position.latestPierName = pier.name;
                     position.latestPierTimestamp = feature.properties.timestampExternal;
                 } else {
-                    positionStr = "Stopped";
+                    positionStr = "Stopped " + Math.round(dist/1000) + " km from " + pier.name;
                 }
             } else {
                 if (dist < range2) {
@@ -448,24 +468,28 @@
 {name: "Kannvik", coords: [21.396303,60.439205]},
 {name: "Finnö", coords: [21.508906,60.180825]},
 {name: "Kirjais", coords: [22.018189,60.121275]},
-        // { name: "Snäckö", coords: []},
-        // { name: "Hummelvik", coords: []},
-        // { name: "Enklinge", coords: []},
-        // { name: "Kumlinge", coords: []},
-        // { name: "Lappo", coords: []},
-        // { name: "Torsholma", coords: []},
-        // { name: "Asterholma", coords: []},
-        // { name: "Åva", coords: []},
-        // { name: "Jurmo", coords: []},
-        // { name: "Vuosnainen", coords: []},
-        // { name: "Teersalo", coords: []},
-        // { name: "Hakkenpää", coords: []},
-        // { name: "Haapala", coords: []},
-        // { name: "Kasnäs", coords: []},
-        // { name: "Långnäs", coords: [22.448759,59.872651]},
-        // { name: "", coords: []},
-        // { name: "", coords: []},
+
         ];
+
+var otherVessels = [
+'230629000', // Viking Grace
+'230172000', // Amorella
+'230361000', // Gabriella
+'230181000', // Mariella
+'230180000', // Rosella
+'266027000', // Viking Cinderella
+
+'230639000', // Baltic Princess
+'266301000', // Galaxy
+'230184000', // Silja Serenade
+'265004000', // Silja Symphony
+
+'230671000', // Finnswan
+'230637000', // Finnfellow
+'266308000', // Eckerö
+'266314000', // Birka Stockholm
+'276817000', // Sailor
+];
 
 
     </script>
