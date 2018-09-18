@@ -12,6 +12,7 @@
         var positionLines = [];
 
         var client;
+        var lastconnection = 0;
 
         function connect() {
             console.log('trying to connect...');
@@ -29,6 +30,7 @@
             };
 
             client.connect({onSuccess:onConnect, useSSL: false});
+            lastconnection = Date.now();
         }
 
         var connectOk = false;
@@ -77,15 +79,18 @@
             $(".messages").html(lines.join('<br/>'));
         }
 
-        function addPositionLine(line) {
+        function addPositionLine(time, line) {
+            positionLines.push({time: time, line: line});
+            positionLines.sort(function(a, b) { return a.time - b.time; });
             if (positionLines.length > 50) {
                 positionLines.shift();
             }
-            positionLines.push(line);
         }
 
         function updatePositionsList() {
-            $(".positions").html(positionLines.join('<br/>'));
+            $(".positions").html(positionLines.map(function(pos) {
+                return pos.time.toLocaleTimeString("fi") + ": " + pos.line;
+            }).join('<br/>'));
         }
 
         function isRecentLocation(location, now) {
@@ -180,6 +185,7 @@
         var interval;
 
         function init() {
+            if (Date.now() - lastconnection < 30000) return;
             if (interval) clearInterval(interval);
             interval = null;
             $.get(baseUri + "metadata/vessels")
@@ -223,6 +229,7 @@
             var positionStr;
             var range1 = pier.coords.length > 2? pier.coords[2]: 100;
             var range2 = pier.coords.length > 3? pier.coords[3]: range1*2.5;
+            var age = Math.round((Date.now() - feature.properties.timestampExternal)/1000);
 
             if (feature.properties.sog <= 0.2) {
                 if (dist < range1) {
@@ -247,10 +254,10 @@
                 position.latest = positionStr;
                 var mmsi = feature.mmsi;
                 var name = vessels[mmsi].name;
-                var time = new Date().toLocaleTimeString("fi");
+                var time = new Date(feature.properties.timestampExternal);
                 if (positionStr == 'On the move' && position.latestPierName) positionStr += ". Left " + position.latestPierName + " at " + new Date(position.latestPierTimestamp).toLocaleTimeString("fi") + ".";
                 positionStr += " " + feature.geometry.coordinates + " " + feature.properties.sog;
-                addPositionLine(time + " " + name + ": " + positionStr);
+                addPositionLine(time, " (" + age + "): " + name + ": " + positionStr);
                 updatePositionsList();
             }
         }
@@ -492,6 +499,9 @@ var otherVessels = [
 266308000, // Eckerö
 266314000, // Birka Stockholm
 276817000, // Sailor
+
+230942840, // Otava
+
 ];
 
 
