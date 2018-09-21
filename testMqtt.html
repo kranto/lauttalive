@@ -1,0 +1,80 @@
+<html>
+<head>
+    <title>Testiclient for vessel locations</title>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js" ></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.2/mqttws31.min.js"></script>
+
+    <script>
+
+        var lines = [];
+
+        function connect() {
+            console.log('trying to connect marine mqtt...');
+
+            //client = new Paho.MQTT.Client("meri-aws-mqtt-test.digitraffic.fi", 9001, 'testclient_' + Date.now());
+            client = new
+            Paho.MQTT.Client("", 61619, '');
+            client.onConnectionLost = function (response) {
+                console.info(Date.now() + ' Collection lost:' + response.errorMessage);
+            }
+            client.onMessageArrived = function(message) {
+                addMessage(message);
+
+                updateList();
+            };
+
+            client.connect({hosts:["b-afca9ce3-f38d-459d-b495-43d879decdaa-1.mq.eu-west-1.amazonaws.com","b-afca9ce3-f38d-459d-b495-43d879decdaa-2.mq.eu-west-1.amazonaws.com"],
+                ports:[61619,61619],
+                onSuccess:onConnect,
+                mqttVersion:4,
+                useSSL:true,
+                userName:"marine", password:"digitraffic_marine"});
+        }
+
+        function onConnect() {
+            console.info(Date.now() + ' Connection open');
+
+            client.subscribe("vessels/#");
+
+            //client.subscribe("vessels/+/locations");
+            //client.subscribe("vessels/status");
+        }
+
+        function addMessage(message) {
+            var text = convert(message);
+
+            if (lines.length > 100) {
+                lines.shift();
+            }
+
+            lines.push(text);
+        }
+
+        function updateList() {
+            $(".messages").html(lines.join('<br/>'));
+        }
+
+        function convert(message) {
+            var content = message.payloadString;
+            var topic = message.destinationName;
+            var time = Date.now();
+            var json = JSON.parse(content);
+            var difference;
+
+            if (typeof json.properties == "undefined") {
+                difference = time - json.timestamp;
+            } else {
+                difference = time - json.properties.timestampExternal;
+            }
+
+            return time + ":(" + difference + "):" + topic + ":" + content;
+        }
+
+        connect();
+    </script>
+</head>
+<body>
+    Messages:
+    <div class="messages" />
+</body>
+</html>
