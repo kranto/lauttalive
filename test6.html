@@ -21,6 +21,7 @@
             updateStatus("connecting");
 
             client = new Paho.MQTT.Client("meri-aws-mqtt-test.digitraffic.fi", 9001, '');
+            client = new Paho.MQTT.Client("", 61619, '');
             // empty client_id, server will generate one
 
             client.onConnectionLost = function (response) {
@@ -34,7 +35,13 @@
                 updateStatus("message arrived", true);
             };
 
-            client.connect({onSuccess:onConnect, useSSL: false});
+            client.connect({hosts:["b-afca9ce3-f38d-459d-b495-43d879decdaa-1.mq.eu-west-1.amazonaws.com","b-afca9ce3-f38d-459d-b495-43d879decdaa-2.mq.eu-west-1.amazonaws.com"],
+                ports:[61619,61619],
+                onSuccess:onConnect,
+                mqttVersion:4,
+                useSSL:true,
+                userName:"marine", password:"digitraffic_marine"});
+            // client.connect({onSuccess:onConnect, useSSL: false});
         }
 
         var connectOk = false;
@@ -87,6 +94,7 @@
         var prevStatus = "";
         function updateStatus(msg, onlyIfChanging) {
             if (typeof onlyIfChanging !== 'undefined' && onlyIfChanging && msg == prevStatus) return;
+            prevStatus = msg;
             msg = new Date().toLocaleTimeString("fi") + ": " + msg;
             $(".status").html(msg);
             addLogMessage(msg);
