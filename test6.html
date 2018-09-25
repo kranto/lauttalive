@@ -15,6 +15,7 @@
 
         var client;
         var lastUpdate = 0;
+        var STATUS = { STOPPED: 0, ONTHEMOVE: 1 };
 
         function connect() {
             console.log('trying to connect...');
@@ -146,7 +147,7 @@
                 var prop = loc.properties;
                 var age = now - prop.timestampExternal;
                 if (age < 30000) recent = true;
-                var class1 = prop.sog > 0.1? "onmove": "halted";
+                var class1 = position.status == STATUS.ONTHEMOVE? "onmove": "halted";
                 return '<tr class="' + class1 + '"><td align="right">' + (i++) + '</td><td>' + mmsi + '</td><td>' + vessels[mmsi].name  + '</td><td align="right">' + Math.round(age/1000) + "</td><td>" + loc.coords + '</td><td align="right">' + prop.sog + '</td><td align="right">' + prop.cog + '</td><td align="right">' + prop.heading + '</td><td>' + vessels[mmsi].destination + "</td><td>" + position.latest + leftMessage + "</td></tr>";
             });
             if (locLines.length > 0) {
@@ -263,11 +264,18 @@
             var position = latestPositions[feature.mmsi];
 
             var positionStr;
+            var status = position.status || STATUS.STOPPED;
             var range1 = pier.coords.length > 2? pier.coords[2]: 100;
             var range2 = pier.coords.length > 3? pier.coords[3]: range1*2.5;
             var age = Math.round((Date.now() - feature.properties.timestampExternal)/1000);
 
-            if (feature.properties.sog <= 0.2) {
+            if (feature.properties.sog >= 0.5) {
+                status = STATUS.ONTHEMOVE;
+            } else if (feature.properties.sog <= 0.2) {
+                status = STATUS.STOPPED;
+            }
+
+            if (status == STATUS.STOPPED) {
                 if (dist < range1) {
                     positionStr = "Stopped at " + pier.name;
                     position.latestPierName = pier.name;
@@ -287,6 +295,7 @@
                 }
             }
             if (position.latest != positionStr) {
+                position.status = status;
                 position.latest = positionStr;
                 var mmsi = feature.mmsi;
                 var name = vessels[mmsi].name;
