@@ -148,7 +148,8 @@
                 var age = now - prop.timestampExternal;
                 if (age < 30000) recent = true;
                 var class1 = position.status == STATUS.ONTHEMOVE? "onmove": "halted";
-                return '<tr class="' + class1 + '"><td align="right">' + (i++) + '</td><td>' + mmsi + '</td><td>' + vessels[mmsi].name  + '</td><td align="right">' + Math.round(age/1000) + "</td><td>" + loc.coords + '</td><td align="right">' + prop.sog + '</td><td align="right">' + prop.cog + '</td><td align="right">' + prop.heading + '</td><td>' + vessels[mmsi].destination + "</td><td>" + position.latest + leftMessage + "</td></tr>";
+                var class2 = position.returned? "returned": "";
+                return '<tr class="' + class1 + ' ' + class2 + '"><td align="right">' + (i++) + '</td><td>' + mmsi + '</td><td>' + vessels[mmsi].name  + '</td><td align="right">' + Math.round(age/1000) + "</td><td>" + loc.coords + '</td><td align="right">' + prop.sog + '</td><td align="right">' + prop.cog + '</td><td align="right">' + prop.heading + '</td><td>' + vessels[mmsi].destination + "</td><td>" + position.latest + leftMessage + "</td></tr>";
             });
             if (locLines.length > 0) {
                 $(".locationstable").html(headerLine + locLines.join('\n'));
@@ -269,9 +270,19 @@
             var range2 = pier.coords.length > 3? pier.coords[3]: range1*2.5;
             var age = Math.round((Date.now() - feature.properties.timestampExternal)/1000);
 
+            var newStop = false;
+            var returned = false;
+
             if (feature.properties.sog >= 0.7) {
                 status = STATUS.ONTHEMOVE;
+                position.returned = false;
             } else if (feature.properties.sog <= 0.2) {
+                if (status != STATUS.STOPPED) {
+                    newStop = true;
+                    if (position.latestPierName == pier.name) {
+                        position.returned = true;
+                    }
+                }
                 status = STATUS.STOPPED;
             }
 
@@ -553,10 +564,13 @@ var otherVessels = [
     </script>
     <style>
     .onmove {
-        background-color: #f0faf0;
+        background-color: #e0ffe0;
     }
     .halted {
-        background-color: #faf0f0;
+        background-color: #ffe0e0;
+    }
+    .returned {
+        background-color: #ffa0a0;
     }
     </style>
 </head>
