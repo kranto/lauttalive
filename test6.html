@@ -16,12 +16,16 @@
         var client;
         var lastUpdate = 0;
         var STATUS = { STOPPED: 0, ONTHEMOVE: 1 };
+        var connectOk = false;
+        var messageCount = 0;
 
         function connect() {
             console.log('trying to connect...');
             updateStatus("connecting");
+            connectOk = false;
+            messageCount = 0;
 
-            client = new Paho.MQTT.Client("meri-aws-mqtt-test.digitraffic.fi", 9001, '');
+            // client = new Paho.MQTT.Client("meri-aws-mqtt-test.digitraffic.fi", 9001, '');
             client = new Paho.MQTT.Client("", 61619, '');
             // empty client_id, server will generate one
 
@@ -33,7 +37,12 @@
                 handleMessage(message);
                 addMessage(message);
                 updateList();
-                updateStatus("message arrived", true);
+                if (messageCount == 0) {
+                    updateStatus("First message arrived", "firstmessagearrived");
+                    messageCount++;
+                } else {
+                    updateStatus("Messages arrived: " + (++messageCount), "messagearrived");                    
+                }
             };
 
             client.connect({hosts:["b-afca9ce3-f38d-459d-b495-43d879decdaa-1.mq.eu-west-1.amazonaws.com","b-afca9ce3-f38d-459d-b495-43d879decdaa-2.mq.eu-west-1.amazonaws.com"],
@@ -45,12 +54,12 @@
             // client.connect({onSuccess:onConnect, useSSL: false});
         }
 
-        var connectOk = false;
         function onConnect() {
             console.info('Connection open');
             updateStatus("connected");
             if (connectOk) return;
             connectOk = true;
+            messageCount = 0;
             Object.keys(latestLocations).forEach(function(mmsi) {
                 client.subscribe("vessels/" + mmsi + "/#");
             });
@@ -92,16 +101,18 @@
             $(".messages").html(lines.join('<br/>'));
         }
 
-        var prevStatus = "";
-        function updateStatus(msg, onlyIfChanging) {
-            if (typeof onlyIfChanging !== 'undefined' && onlyIfChanging && msg == prevStatus) return;
-            prevStatus = msg;
+        function updateStatus(msg, msgId) {
             msg = new Date().toLocaleTimeString("fi") + ": " + msg;
             $(".status").html(msg);
-            addLogMessage(msg);
+            addLogMessage(msg, msgId);
         }
 
-        function addLogMessage(message) {
+        var prevMsgId = null;
+        function addLogMessage(message, msgId) {
+            if (prevMsgId != null && msgId === prevMsgId) {
+                logLines.pop();
+            }
+            prevMsgId = msgId? msgId: null;
             logLines.push(message);
             if (logLines.length > 1000) {
                 logLines.shift();
@@ -113,7 +124,7 @@
         function addPositionLine(time, line) {
             positionLines.push({time: time, line: line});
             positionLines.sort(function(a, b) { return a.time - b.time; });
-            if (positionLines.length > 50) {
+            if (positionLines.length > 150) {
                 positionLines.shift();
             }
         }
@@ -459,7 +470,7 @@
 {name: "Jurmo (Brändö)", coords: [21.074051,60.515948]},
 {name: "Enklinge", coords: [20.751087,60.318366]},
 {name: "Luk", coords: [21.32105,60.151441]},
-{name: "Östra Tallholm", coords: [22.16423,60.160215]},
+{name: "Östra Tallholm", coords: [22.16423,60.160215], 30},
 {name: "Kettumaa", coords: [21.690759,60.403492]},
 {name: "Korvenmaa", coords: [21.68068,60.36563]},
 {name: "Norrby", coords: [21.389945,60.397095]},
