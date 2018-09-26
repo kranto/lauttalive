@@ -269,7 +269,7 @@
             var range2 = pier.coords.length > 3? pier.coords[3]: range1*2.5;
             var age = Math.round((Date.now() - feature.properties.timestampExternal)/1000);
 
-            if (feature.properties.sog >= 0.5) {
+            if (feature.properties.sog >= 0.7) {
                 status = STATUS.ONTHEMOVE;
             } else if (feature.properties.sog <= 0.2) {
                 status = STATUS.STOPPED;
@@ -301,7 +301,7 @@
                 var name = vessels[mmsi].name;
                 var time = new Date(feature.properties.timestampExternal);
                 if (positionStr == 'On the move' && position.latestPierName) positionStr += ". Left " + position.latestPierName + " at " + new Date(position.latestPierTimestamp).toLocaleTimeString("fi") + ".";
-                positionStr += " " + feature.geometry.coordinates + " " + feature.properties.sog;
+                positionStr += " " + feature.geometry.coordinates + " " + feature.properties.sog + " " + feature.properties.cog + " " + feature.properties.heading;
                 addPositionLine(time, " (" + age + "): " + name + ": " + positionStr);
                 updatePositionsList();
             }
