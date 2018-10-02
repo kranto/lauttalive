@@ -290,7 +290,7 @@
             } else if (feature.properties.sog <= 0.2) {
                 if (status != STATUS.STOPPED) {
                     newStop = true;
-                    if (position.latestPierName == pier.name) {
+                    if (position.latestPierName == pier.name && dist < range1) {
                         position.returned = true;
                     }
                 }
@@ -299,7 +299,7 @@
 
             if (status == STATUS.STOPPED) {
                 if (dist < range1) {
-                    positionStr = "Stopped at " + pier.name;
+                    positionStr = (position.returned? "Returned to ": "Stopped at ") + pier.name;
                     position.latestPierName = pier.name;
                     position.latestPierTimestamp = feature.properties.timestampExternal;
                 } else {
