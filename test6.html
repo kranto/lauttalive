@@ -281,15 +281,11 @@
             var range2 = pier.coords.length > 3? pier.coords[3]: range1*2.5;
             var age = Math.round((Date.now() - feature.properties.timestampExternal)/1000);
 
-            var newStop = false;
-            var returned = false;
-
             if (feature.properties.sog >= 0.7) {
                 status = STATUS.ONTHEMOVE;
                 position.returned = false;
             } else if (feature.properties.sog <= 0.2) {
                 if (status != STATUS.STOPPED) {
-                    newStop = true;
                     if (position.latestPierName == pier.name && dist < range1) {
                         position.returned = true;
                     }
@@ -557,8 +553,11 @@
 {name: "Turku Repair Yard", coords: [22.03059,60.45167,200]},
 {name: "Teijon telakka", coords: [22.94611,60.25321,200]},
 
+{name: "Kotka", coords: [26.96381,60.46029]},
 {name: "Haapasaari", coords: [27.18597,60.28592]},
-
+{name: "Kirkonmaa", coords: [27.013901,60.404639]},
+{name: "Kuutsalo", coords: [27.008828,60.440956]},
+{name: "Kaunissaari", coords: [26.775850,60.344613]},
 
         ];
 
