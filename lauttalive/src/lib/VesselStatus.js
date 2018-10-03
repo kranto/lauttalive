@@ -4,8 +4,6 @@ import $ from 'jquery';
 
 let baseUri = "https://meri-aws-test.digitraffic.fi/api/v1/";
 let STATUS = { STOPPED: 0, ONTHEMOVE: 1 };
-let connectOk = false;
-let messageCount = 0;
 
 var otherVessels = [
 230629000, // Viking Grace
@@ -52,40 +50,6 @@ function isInArea(feature) {
   return (coords[0] >= 19.8 && coords[0] <= 23 && coords[1] >= 59.7 && coords[1] <= 60.7);
 }
 
-console.log(window.Paho);
-let client = new Paho.Client("", 61619, '');
-
-function connect() {
-  console.log('trying to connect...');
-
-  client.onConnectionLost = function (response) {
-    console.log(response);
-    console.info('Connection lost:' + response.errorMessage);
-  };
-  
-  client.onMessageArrived = function(message) {
-    console.log('Message arrived', message);
-  };
-
-  client.connect({
-    // hosts:["b-afca9ce3-f38d-459d-b495-43d879decdaa-1.mq.eu-west-1.amazonaws.com","b-afca9ce3-f38d-459d-b495-43d879decdaa-2.mq.eu-west-1.amazonaws.com"],
-    hosts:["b-afca9ce3-f38d-459d-b495-43d879decdaa-2.mq.eu-west-1.amazonaws.com"],
-    ports:[61619],
-    onSuccess: onConnect1,
-    mqttVersion:4,
-    useSSL:true,
-    userName:"marine", password:"digitraffic_marine"});
-}
-
-function onConnect1() {
-  console.info('Connection open');
-  otherVessels
-    .forEach(mmsi => { client.subscribe("vessels/" + mmsi + "/#"); });
-}
-
-//connect();
-
-
 // --
 
 class VesselStatus {
@@ -93,7 +57,8 @@ class VesselStatus {
   constructor(app) {
     console.log('VesselStatus initialized', app);
     this.app = app;
-    console.log(this.app);
+    this.connectOk = false;
+    this.messageCount = 0;
     this.lastUpdate = 0;
     this.vessels = {};
     this.latestLocations = {};
@@ -104,31 +69,14 @@ class VesselStatus {
   connect() {
     console.log('trying to connect...');
     this.app.updateStatus("connecting");
-    connectOk = false;
-    messageCount = 0;
+    this.connectOk = false;
+    this.messageCount = 0;
 
-    this.client = client; //  new Paho.Client("", 61619, '');
+    this.client = new window.Paho.MQTT.Client("", 61619, '');
+    this.client.onConnectionLost = this.onConnectionLost.bind(this);
+    this.client.onMessageArrived = this.onMessageArrived.bind(this);
 
-    client.onConnectionLost = function (response) {
-      console.info('Connection lost:' + response.errorMessage);
-      this.app.updateStatus("connection lost");
-    }.bind(this);
-    
-    client.onMessageArrived = function(message) {
-      let content = message.payloadString;
-      let data = JSON.parse(content);
-      let msg = { time: Date.now(), data: data };
-      this.handleMessage(data);
-      this.app.addRawMessage(msg);
-      if (messageCount === 0) {
-        this.app.updateStatus("First message arrived", "firstmessagearrived");
-        messageCount++;
-      } else {
-        this.app.updateStatus("Messages arrived: " + (++messageCount), "messagearrived");                    
-      }
-    }.bind(this);
-
-    client.connect({
+    this.client.connect({
       // hosts:["b-afca9ce3-f38d-459d-b495-43d879decdaa-1.mq.eu-west-1.amazonaws.com","b-afca9ce3-f38d-459d-b495-43d879decdaa-2.mq.eu-west-1.amazonaws.com"],
       hosts:["b-afca9ce3-f38d-459d-b495-43d879decdaa-2.mq.eu-west-1.amazonaws.com"],
       ports:[61619],
@@ -138,35 +86,36 @@ class VesselStatus {
       userName:"marine", password:"digitraffic_marine"});
   }
 
+  onConnectionLost(response) {
+    console.info('Connection lost:' + response.errorMessage);
+    this.app.updateStatus("connection lost");
+  }
+    
+  onMessageArrived(message) {
+    let content = message.payloadString;
+    let data = JSON.parse(content);
+    let msg = { time: Date.now(), data: data };
+    this.handleMessage(data);
+    this.app.addRawMessage(msg);
+    if (this.messageCount++ === 0) {
+      this.app.updateStatus("First message arrived", "firstmessagearrived");
+    } else {
+      this.app.updateStatus("Messages arrived: " + this.messageCount, "messagearrived");                    
+    }
+  }
+
   onConnect() {
     console.info('Connection open');
     this.app.updateStatus("connected");
-    if (connectOk) return;
-    connectOk = true;
-    messageCount = 0;
+    if (this.connectOk) return;
+    this.connectOk = true;
+    this.messageCount = 0;
     var client = this.client;
-    var latestLocations = this.latestLocations;
     Object.keys(this.latestLocations)
       .forEach(mmsi => { client.subscribe("vessels/" + mmsi + "/#"); });
     otherVessels
       .filter(mmsi => { return this.latestLocations[mmsi]; })
       .forEach(mmsi => { client.subscribe("vessels/" + mmsi + "/#"); });
-  }
-
-  convert(message) {
-    var content = message.payloadString;
-    var topic = message.destinationName;
-    var time = Date.now();
-    var data = JSON.parse(content);
-    var difference;
-
-    if (typeof data.properties == "undefined") {
-      difference = time - data.timestamp;
-    } else {
-      difference = time - data.properties.timestampExternal;
-    }
-
-    return time + ":(" + difference + "): " + topic + ": " + content;
   }
 
   storeMetadata(metadata) {

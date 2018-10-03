@@ -31,7 +31,7 @@ class App extends Component {
     log.push({time: time, message: message, msgId: msgId});
     if (log.length > 1000) log.shift();
     this.setState({log: log});
-    console.log(message, log.length);
+    // console.log(message, log.length);
   }
 
   addRawMessage(msg) {
