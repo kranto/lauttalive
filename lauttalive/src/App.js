@@ -15,13 +15,6 @@ class App extends Component {
     }
 
     let v = new VesselStatus(this);
-
-    setInterval(this.timer.bind(this), 1000);
-  }
-
-  timer() {
-    this.addMessage(Date.now() + ' ' + 'message');
-    this.updateStatus('status message');
   }
 
   updateStatus(msg, msgId) {
@@ -41,11 +34,15 @@ class App extends Component {
     console.log(message, log.length);
   }
 
-  addMessage(msg) {
+  addRawMessage(msg) {
     let messages = this.state.messages;
     messages.push(msg);
     if (messages.length > 100) messages.shift();
     this.setState({messages: messages});
+  }
+
+  addPositionLine(time, text) {
+    console.log('addPositionLine', time, text);
   }
 
   render() {
