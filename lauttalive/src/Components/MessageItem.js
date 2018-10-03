@@ -9,7 +9,7 @@ class MessageItem extends Component {
   render() {
     return (
       <div className="MessageItem">
-        {this.props.text}
+        {this.props.time} - {this.props.content}
       </div>
     );
   }

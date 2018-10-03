@@ -29,7 +29,7 @@ class Messages extends Component {
 
   render() {
     let messageItems = this.props.messages.map(m => {
-      return (<MessageItem key={m} text={m}/>)
+      return (<MessageItem key={m.time} time={m.time} content={JSON.stringify(m.data)}/>)
     });
 
     return (

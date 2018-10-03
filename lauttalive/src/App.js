@@ -10,7 +10,7 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      messages: [ "test", "xyz"],
+      messages: [],
       log: [],
     }
 

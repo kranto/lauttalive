@@ -116,8 +116,10 @@ class VesselStatus {
     
     client.onMessageArrived = function(message) {
       let content = message.payloadString;
-      this.handleMessage(content);
-      this.app.addRawMessage(content);
+      let data = JSON.parse(content);
+      let msg = { time: Date.now(), data: data };
+      this.handleMessage(data);
+      this.app.addRawMessage(msg);
       if (messageCount === 0) {
         this.app.updateStatus("First message arrived", "firstmessagearrived");
         messageCount++;
@@ -195,9 +197,7 @@ class VesselStatus {
     }
   }
 
-  handleMessage(content) {
-    var data = JSON.parse(content);
-
+  handleMessage(data) {
     if (data && data.shipType) { // is metadata
       this.handleMetadata(data);
     }
