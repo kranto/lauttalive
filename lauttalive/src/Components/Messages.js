@@ -1,8 +1,8 @@
-import React, { Component } from 'react';
+import React from 'react';
+import AutoScrollList from './AutoScrollList';
 import MessageItem from './MessageItem';
-import uuid from 'uuid';
 
-class Messages extends Component {
+class Messages extends AutoScrollList {
 
   constructor() {
     super();
@@ -13,10 +13,12 @@ class Messages extends Component {
 
   resumeUpdate() {
     this.setState({isSuspended: false});
+    this.forceUpdate();
   }
 
   suspendUpdate() {
     this.setState({isSuspended: true});
+    this.forceUpdate();
   }
 
   shouldComponentUpdate() {
@@ -29,11 +31,11 @@ class Messages extends Component {
 
   render() {
     let messageItems = this.props.messages.map(m => {
-      return (<MessageItem key={m.time} time={m.time} content={JSON.stringify(m.data)}/>)
+      return (<MessageItem key={m.id} message={m}/>)
     });
 
     return (
-      <div className={this.classes()} onMouseEnter={this.suspendUpdate.bind(this)} onMouseLeave={this.resumeUpdate.bind(this)}>
+      <div className={this.classes()} onMouseEnter={this.suspendUpdate.bind(this)} onMouseLeave={this.resumeUpdate.bind(this)} ref={(div) => {this.autoScrollList = div;}}>
         {messageItems}
       </div>
     );

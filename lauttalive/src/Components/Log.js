@@ -1,7 +1,8 @@
-import React, { Component } from 'react';
+import React from 'react';
+import AutoScrollList from './AutoScrollList';
 import LogItem from './LogItem';
 
-class Log extends Component {
+class Log extends AutoScrollList {
 
   render() {
     let logItems = this.props.log.map(l => {
@@ -9,7 +10,7 @@ class Log extends Component {
     });
 
     return (
-      <div className="Log">
+      <div className="Log" ref={(div) => {this.autoScrollList = div;}}>
         {logItems}
       </div>
     );

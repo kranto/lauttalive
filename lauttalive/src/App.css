@@ -1,7 +1,6 @@
 .App {
-/*  text-align: center; */
-margin-left: 10px;
-margin-right: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
 }
 
 .Messages {
@@ -13,10 +12,6 @@ margin-right: 10px;
   padding: 5px;
 }
 
-.suspended {
-  background-color: #ffe0e0;
-}
-
 .Log {
   border: 1px solid;
   min-height: 50px;
@@ -25,11 +20,25 @@ margin-right: 10px;
   padding: 5px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.PositionLog {
+  border: 1px solid;
+  max-height: 300px;
+  overflow-y: scroll;
+}
+
+.onmove {
+  background-color: #e0ffe0;
+}
+.halted {
+  background-color: #ffe0e0;
+}
+.returned {
+  background-color: #ffa0a0;
+}
+.suspended {
+  background-color: #ffe0e0;
+}
+.smaller {
+  font-size: 0.8em;
+  color: #888;
 }

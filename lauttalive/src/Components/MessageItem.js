@@ -6,10 +6,15 @@ class MessageItem extends Component {
     super();
   }
 
+  shouldComponentUpdate() {
+    return false;    
+  }
+
   render() {
+    let m = this.props.message;
     return (
       <div className="MessageItem">
-        {this.props.time} - {this.props.content}
+        {m.time}({m.latency}): {m.topic}: {JSON.stringify(this.props.message.data)}
       </div>
     );
   }
