@@ -1,5 +1,8 @@
-import Paho from 'paho-mqtt';
+import MQTT from 'paho-mqtt';
 import $ from 'jquery';
+
+// workaround: https://github.com/eclipse/paho.mqtt.javascript/issues/150
+window.Paho = {MQTT};
 
 let baseUri = "https://meri-aws-test.digitraffic.fi/api/v1/";
 let STATUS = { STOPPED: 0, ONTHEMOVE: 1 };
@@ -37,15 +40,15 @@ class VesselStatus {
     this.connectOk = false;
     this.messageCount = 0;
 
+    // workaround: https://github.com/eclipse/paho.mqtt.javascript/issues/150
     this.client = new window.Paho.MQTT.Client("", 61619, '');
     // this.client = new Paho.Client("", 61619, '');
     this.client.onConnectionLost = this.onConnectionLost.bind(this);
     this.client.onMessageArrived = this.onMessageArrived.bind(this);
 
     this.client.connect({
-      // hosts:["b-afca9ce3-f38d-459d-b495-43d879decdaa-1.mq.eu-west-1.amazonaws.com","b-afca9ce3-f38d-459d-b495-43d879decdaa-2.mq.eu-west-1.amazonaws.com"],
-      hosts:["b-afca9ce3-f38d-459d-b495-43d879decdaa-2.mq.eu-west-1.amazonaws.com"],
-      ports:[61619],
+      hosts:["b-afca9ce3-f38d-459d-b495-43d879decdaa-1.mq.eu-west-1.amazonaws.com","b-afca9ce3-f38d-459d-b495-43d879decdaa-2.mq.eu-west-1.amazonaws.com"],
+      ports:[61619,61619],
       onSuccess:this.onConnect.bind(this),
       mqttVersion:4,
       useSSL:true,
