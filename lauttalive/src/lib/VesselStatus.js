@@ -159,8 +159,9 @@ class VesselStatus {
     this.loadMetadata(() => { this.loadLocations.bind(this)( () => { this.connect.bind(this); } )});
 
     this.interval = setInterval(function() {
+      console.log(this.lastUpdate);
       if (Date.now() - this.lastUpdate > 30000) this.init();
-    }, 16000);
+    }.bind(this), 16000);
   }
 
   updatePosition(feature) {
