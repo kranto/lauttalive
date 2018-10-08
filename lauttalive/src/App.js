@@ -8,6 +8,8 @@ import PositionLog from './Components/PositionLog'
 import LocationTable from './Components/LocationTable'
 import VesselStatus from './lib/VesselStatus'
 import uuid from 'uuid';
+import { Provider } from "react-redux";
+import store from "./store";
 
 class App extends Component {
   constructor() {
@@ -64,16 +66,18 @@ class App extends Component {
 
   render() {
     return (
-      <div className="App">
-        <h2>Raw Messages</h2>
-        <Messages messages={this.state.messages}/>
-        <h2>Log</h2>
-        <Log log={this.state.log} />
-        <h2>Position updates</h2>
-        <PositionLog log={this.state.positionLog} />
-        <h2>Locations</h2>
-        <LocationTable locations={this.state.locations} />
-      </div>
+      <Provider store={store}>
+        <div className="App">
+          <h2>Raw Messages</h2>
+          <Messages messages={this.state.messages}/>
+          <h2>Log</h2>
+          <Log log={this.state.log} />
+          <h2>Position updates</h2>
+          <PositionLog log={this.state.positionLog} />
+          <h2>Locations</h2>
+          <LocationTable locations={this.state.locations} />
+        </div>
+      </Provider>
     );
   }
 }
