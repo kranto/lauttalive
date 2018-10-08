@@ -5,12 +5,13 @@ export default function reducer(state={
 	metadataError: false
 }, action) {
 	switch(action.type) {
-		case "FETCH_METADATA_PENDING":
+	case "FETCH_METADATA_PENDING":
 		return {...state, fetchingMetadata: true, metadataError: false}
-		case "FETCH_METADATA_SUCCESS":
+	case "FETCH_METADATA_SUCCESS":
 		return {...state, fetchingMetadata: false, metadataError: false, metadata: action.payload}
-		case "FETCH_METADATA_ERROR":
+	case "FETCH_METADATA_ERROR":
 		return {...state, fetchingMetadata: false, metadataError: action.payload, metadata: null}
+	default:
+		return state;
 	}
-	return state;
 }

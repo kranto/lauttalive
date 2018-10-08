@@ -32,8 +32,9 @@ export default function reducer(state={
 	        const locations = {...state.locations};
 	        locations[entry.vessel.mmsi] = entry;
 			return {...state, positionLog: positionLog, locations: locations}
+		default:
+			return state;
 	}
-	return state;
 }
 
 

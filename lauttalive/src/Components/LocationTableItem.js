@@ -18,7 +18,7 @@ class LocationTableItem extends Component {
     let g = l.geometry;
     let p = l.properties;
     let leftSecondsAgo = d.position.latestPierTimestamp? this.props.now - d.position.latestPierTimestamp/1000: 0;
-    let leftMessage = d.position.latest == "On the move" && d.position.latestPierTimestamp?
+    let leftMessage = d.position.latest === "On the move" && d.position.latestPierTimestamp?
      ". Left " + d.position.latestPierName + " " + Math.round(leftSecondsAgo/60) + " minutes ago": "";
     return (
       <tr className={this.classes()}>

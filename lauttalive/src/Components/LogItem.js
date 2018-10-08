@@ -8,7 +8,7 @@ class LogItem extends Component {
   }
 
   shouldComponentUpdate(nextProps) {
-    return this.prevTime != nextProps.time;
+    return this.prevTime !== nextProps.time;
   }
 
   render() {

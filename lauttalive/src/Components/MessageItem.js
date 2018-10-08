@@ -2,10 +2,6 @@ import React, { Component } from 'react';
 
 class MessageItem extends Component {
 
-  constructor() {
-    super();
-  }
-
   shouldComponentUpdate() {
     return false;    
   }
