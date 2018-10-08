@@ -1,6 +1,8 @@
 import { combineReducers } from "redux";
-import vesselReducer from "./vesselReducer";
+import vessels from "./vesselReducer";
+import messages from "./messagesReducer";
 
 export default combineReducers({
-	vesselReducer
+	vessels,
+	messages
 })

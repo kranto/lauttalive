@@ -24,7 +24,7 @@ function isInArea(feature) {
 
 class VesselStatus {
 
-  constructor(app) {
+  constructor(app, store) {
     this.app = app;
     this.connectOk = false;
     this.messageCount = 0;
@@ -32,11 +32,12 @@ class VesselStatus {
     this.vessels = {};
     this.latestLocations = {};
     this.latestPositions = {};
+    this.store = store;
   }
 
   connect() {
     console.log('trying to connect...');
-    this.app.updateStatus("connecting");
+    this.store.dispatch({type: "STATUS_UPDATE", payload: {status: "Connecting"}});
     this.connectOk = false;
     this.messageCount = 0;
 
@@ -57,7 +58,7 @@ class VesselStatus {
 
   onConnectionLost(response) {
     console.info('Connection lost:' + response.errorMessage);
-    this.app.updateStatus("connection lost");
+    this.store.dispatch({type: "STATUS_UPDATE", payload: {status: "Connection lost"}});
   }
     
   onMessageArrived(message) {
@@ -67,18 +68,19 @@ class VesselStatus {
     let origTime = data.timestamp? data.timestamp: data.properties.timestampExternal;
     let latency = Math.max(0, time - origTime);
     let msg = { time: time, latency: latency, topic: message.destinationName, data: data };
-    this.app.addRawMessage(msg);
+
+    this.store.dispatch({type: "NEW_MESSAGE", payload: msg});
     if (this.messageCount++ === 0) {
-      this.app.updateStatus("First message arrived", "firstmessagearrived");
+      this.store.dispatch({type: "STATUS_UPDATE", payload: {status: "First message arrived", msgId: "firstmessagearrived"}});
     } else {
-      this.app.updateStatus("Messages arrived: " + this.messageCount, "messagearrived");                    
+      this.store.dispatch({type: "STATUS_UPDATE", payload: {status: "Messages arrived: " + this.messageCount, msgId: "messagearrived"}});
     }
     this.handleMessage(data);
   }
 
   onConnect() {
     console.info('Connection open');
-    this.app.updateStatus("connected");
+    this.store.dispatch({type: "STATUS_UPDATE", payload: {status: "connected"}});
     if (this.connectOk) return;
     this.connectOk = true;
     this.messageCount = 0;
@@ -131,7 +133,7 @@ class VesselStatus {
   async loadLocations(callback) {
     await axios.get(baseUri + "locations/latest")
     .then(({data}) => {
-      this.app.updateStatus("locations loaded");
+      this.store.dispatch({type: "STATUS_UPDATE", payload: {status: "Locations loaded"}});
       data.features.forEach(l => this.handleLocation(l));
     });
   }
@@ -139,7 +141,7 @@ class VesselStatus {
   async loadMetadata(callback) {
     await axios.get(baseUri + "metadata/vessels")
     .then(({data}) => {
-      this.app.updateStatus("vessels loaded");
+      this.store.dispatch({type: "STATUS_UPDATE", payload: {status: "Vessels loaded"}});
       data.forEach(v => this.handleMetadata(v));
     });
   }
@@ -148,7 +150,7 @@ class VesselStatus {
     await loadData();
     
     this.lastUpdate = Date.now();
-    this.app.updateStatus("initializing");
+    this.store.dispatch({type: "STATUS_UPDATE", payload: {status: "Initializing"}});
 
     await this.loadMetadata();
     await this.loadLocations();
@@ -215,9 +217,10 @@ class VesselStatus {
     var mmsi = feature.mmsi;
     var time = feature.properties.timestampExternal;
     if (positionStr === 'On the move' && position.latestPierName) positionStr += ". Left " + position.latestPierName + " at " + new Date(position.latestPierTimestamp).toLocaleTimeString("fi") + ".";
-    this.app.positionUpdate({time: time, latency: age, vessel: this.vessels[mmsi], location: feature, message: positionStr, isStopped: (status === STATUS.STOPPED), isReturned: position.returned, position: position}, changed);
+    // this.app.positionUpdate({time: time, latency: age, vessel: this.vessels[mmsi], location: feature, message: positionStr, isStopped: (status === STATUS.STOPPED), isReturned: position.returned, position: position}, changed);
+    const entry = {time: time, latency: age, vessel: this.vessels[mmsi], location: feature, message: positionStr, isStopped: (status === STATUS.STOPPED), isReturned: position.returned, position: position};
+    this.store.dispatch({type: "POSITION_UPDATE", payload: {entry: entry, changed: changed}})
   }
-
 }
 
 export default VesselStatus;

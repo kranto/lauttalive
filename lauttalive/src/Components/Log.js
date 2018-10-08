@@ -1,6 +1,8 @@
 import React from 'react';
 import AutoScrollList from './AutoScrollList';
 import LogItem from './LogItem';
+import { connect } from 'react-redux';
+
 
 class Log extends AutoScrollList {
 
@@ -17,4 +19,10 @@ class Log extends AutoScrollList {
   }
 }
 
-export default Log;
+const mapStateToProps = (state) => {
+  return {
+    log: state.messages.log
+  };
+};
+
+export default connect(mapStateToProps)(Log);

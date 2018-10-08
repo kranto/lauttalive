@@ -14,7 +14,7 @@ class MessageItem extends Component {
     let m = this.props.message;
     return (
       <div className="MessageItem">
-        {m.time}({m.latency}): {m.topic}: {JSON.stringify(this.props.message.data)}
+        {m.time}({m.latency}): {m.topic}: {JSON.stringify(m.data)}
       </div>
     );
   }

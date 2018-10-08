@@ -3,13 +3,6 @@ import AutoScrollList from './AutoScrollList';
 import MessageItem from './MessageItem';
 import { connect } from 'react-redux';
 
-@connect((store) => {
-  console.log(store);
-  return {
-    messages1: store.messages
-  };
-})
-
 class Messages extends AutoScrollList {
 
   constructor() {
@@ -38,8 +31,6 @@ class Messages extends AutoScrollList {
   }
 
   render() {
-    console.log(this.props.messages1);
-
     let messageItems = this.props.messages.map(m => {
       return (<MessageItem key={m.id} message={m}/>)
     });
@@ -52,4 +43,11 @@ class Messages extends AutoScrollList {
   }
 }
 
-export default Messages;
+const mapStateToProps = (state) => {
+  return {
+    messages: state.messages.messages
+  };
+};
+
+export default connect(mapStateToProps)(Messages);
+

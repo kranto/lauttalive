@@ -1,6 +1,7 @@
 import React from 'react';
 import AutoScrollList from './AutoScrollList';
 import PositionLogItem from './PositionLogItem';
+import { connect } from 'react-redux';
 
 class PositionLog extends AutoScrollList {
 
@@ -17,4 +18,10 @@ class PositionLog extends AutoScrollList {
   }
 }
 
-export default PositionLog;
+const mapStateToProps = (state) => {
+  return {
+    log: state.messages.positionLog
+  };
+};
+
+export default connect(mapStateToProps)(PositionLog);

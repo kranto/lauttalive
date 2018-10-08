@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import LocationTableItem from './LocationTableItem';
+import { connect } from 'react-redux';
 
 function isRecentLocation(location, now) {
   return now*1000 - location.properties.timestampExternal < 600000;
@@ -41,4 +42,10 @@ class LocationTable extends Component {
   }
 }
 
-export default LocationTable;
+const mapStateToProps = (state) => {
+  return {
+    locations: state.messages.locations
+  };
+};
+
+export default connect(mapStateToProps)(LocationTable);
