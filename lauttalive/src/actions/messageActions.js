@@ -8,6 +8,9 @@ export function statusUpdated(status, msgId) {
 }
 
 export function newMessage(msg) {
-  return {type: "NEW_MESSAGE", payload: msg}
+  return {type: "NEW_MESSAGE", payload: msg};
 }
 
+export function setLocationFilter(isOn) {
+  return {type: "SET_LOCATION_FILTER", payload: isOn};
+}
