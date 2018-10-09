@@ -11,7 +11,7 @@ import store from "./store";
 class App extends Component {
   constructor() {
     super();
-    this.vesselStatus = new VesselStatus(this, store);
+    this.vesselStatus = new VesselStatus(store);
   }
 
   componentWillMount() {
