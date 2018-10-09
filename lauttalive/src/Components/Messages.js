@@ -34,18 +34,18 @@ class Messages extends AutoScrollList {
     let messageItems = this.props.messages.map(m => {
       return (<MessageItem key={m.id} message={m}/>)
     });
-
+    if (this.props.loading) messageItems = "Loading...";
     return (
       <div className={this.classes()} onMouseEnter={this.suspendUpdate.bind(this)} onMouseLeave={this.resumeUpdate.bind(this)} ref={(div) => {this.autoScrollList = div;}}>
         {messageItems}
-      </div>
-    );
+      </div>);
   }
 }
 
 const mapStateToProps = (state) => {
   return {
-    messages: state.messages.messages
+    messages: state.messages.messages,
+    loading: state.messages.loadingMessages
   };
 };
 

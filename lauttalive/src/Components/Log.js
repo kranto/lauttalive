@@ -10,6 +10,9 @@ class Log extends AutoScrollList {
     let logItems = this.props.log.map(l => {
       return (<LogItem key={l.time} time={l.time} message={l.message}/>)
     });
+    if (this.props.log.length === 0) {
+      logItems = "Log empty";
+    }
 
     return (
       <div className="Log" ref={(div) => {this.autoScrollList = div;}}>

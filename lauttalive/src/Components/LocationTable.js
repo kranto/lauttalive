@@ -31,14 +31,21 @@ class LocationTable extends Component {
         return (<LocationTableItem key={l.vessel.mmsi} index={i++} data={l} now={this.state.now}/>)
     });
 
-    return (
-      <table className="LocationTable">
-        <tbody>
-          <tr><th>#</th><th>MMSI</th><th>vessel name</th><th>age</th><th>location</th><th>speed</th><th>course</th><th>heading</th><th>destination</th><th>position</th></tr>
-          {items}
-        </tbody>
-      </table>
-    );
+
+    if (items.length > 0) {
+      return (      
+        <table className="LocationTable">
+          <tbody>
+            <tr><th>#</th><th>MMSI</th><th>vessel name</th><th>age</th><th>location</th><th>speed</th><th>course</th><th>heading</th><th>destination</th><th>position</th></tr>
+            {items}
+          </tbody>
+        </table>
+      );
+    } else {
+      return (
+        <strong>No locations received yet</strong>
+      );
+    } 
   }
 }
 

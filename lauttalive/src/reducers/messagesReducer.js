@@ -2,6 +2,7 @@ import uuid from 'uuid';
 
 export default function reducer(state={
 	messages: [],
+	loadingMessages: true,
 	log: [],
 	positionLog: [],
 	locations: {}
@@ -12,7 +13,7 @@ export default function reducer(state={
 		    msg.id = uuid.v4();
 			const messages = state.messages.concat(action.payload); 
 			if (messages.length > 150) messages.shift(); 
-			return {...state, messages: messages}
+			return {...state, messages: messages, loadingMessages: false}
 		case "STATUS_UPDATE":
 		    let time = Date.now();
 			let {status, msgId} = action.payload;

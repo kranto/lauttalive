@@ -10,6 +10,10 @@ class PositionLog extends AutoScrollList {
       return (<PositionLogItem key={l.id} line={l}/>)
     });
 
+    if (logItems.length === 0) {
+      logItems = "No positions received yet"
+    }
+
     return (
       <div className="PositionLog" ref={(div) => {this.autoScrollList = div;}}>
         {logItems}
