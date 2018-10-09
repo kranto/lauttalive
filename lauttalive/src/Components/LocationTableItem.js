@@ -7,11 +7,12 @@ class LocationTableItem extends Component {
   }
 
   shouldComponentUpdate(nextProps) {
-    return nextProps.now !== this.prevNow;
+    return nextProps.now !== this.prevNow || nextProps.index !== this.prevIndex;
   }
 
   render() {
     this.prevNow = this.props.now;
+    this.prevIndex = this.props.index;
     let d = this.props.data;
     let v = d.vessel;
     let l = d.location;
