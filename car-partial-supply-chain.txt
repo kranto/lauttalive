@@ -21,7 +21,7 @@
 # layout: horizontalflow
 ## CSV data starts below this line
 id,name,supplier,shapeType
-mb,Mine B,,raw
+mb,Mine B,11,raw
 ma,Mine A,,raw
 mc,Mine C,,raw
 md,Mine D,,raw
@@ -58,7 +58,7 @@ a5,Assembly 5,16,assembly
 6,bearings,man2,component
 7,transmission fluid,cb,component
 8,sealant,cc,component
-9,transmission control unit b,ea,component
+9,transmission control unit c,ea,component
 10,gasket,man5,component
 11,seals,man5,component
 12,planetary gear train,a2,component
