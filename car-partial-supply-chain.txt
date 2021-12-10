@@ -31,7 +31,7 @@ w3,Well 3,,well
 w4,Well 4b,,well
 fa,Foundry A,"mb,mc,ma",foundry
 fb,Foundry B,"mc,md",foundry
-fc,Foundry C,"ma,md",foundry
+fc,Foundry C,"ma,md,16",foundry
 o1,Oil and Gas 1,w2,raw
 o2,Oil and Gas 2,"w4,w3",raw
 o3,Oil and Gas 3,w1,raw
